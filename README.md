@@ -51,7 +51,7 @@ Body: {
 │   │   │    └── rabbitmq.py
 │   │   └── service
 │   │   │    ├── __init__.py
-│   │   │    └── handler.py
+│   │   │    └── request_handler.py
 │   │   │    └── producer.py
 │   │   ├── __init__.py
 │   │   ├── __main__.py
