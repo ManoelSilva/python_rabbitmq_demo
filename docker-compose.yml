@@ -1,0 +1,66 @@
+version: '3'
+
+services:
+  rabbitmq:
+    container_name: rabbitmq
+    image: rabbitmq:3.11.5-management-alpine
+    hostname: rabbitmq-host
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: radmin
+      RABBITMQ_DEFAULT_PASS: radmin
+    networks:
+      - rabbitmq-network
+
+  producer:
+    build:
+      context: ./producer
+      dockerfile: Dockerfile
+    container_name: producer
+    depends_on:
+      - rabbitmq
+      - receiver
+    ports:
+      - "7000:7000"
+    environment:
+      RABBITMQ_USERNAME: radmin
+      RABBITMQ_PASSWORD: radmin
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_QUEUE: test-queue
+      RABBITMQ_ROUTING_KEY: test-queue 
+      RABBITMQ_EXCHANGE: test-exchange
+      SERVER_PORT: 7000
+      SERVER_HOST: 0.0.0.0
+      ENV: prod
+    networks:
+      - rabbitmq-network
+    restart: always
+    # healthcheck:
+    #   interval: 10s
+    #   timeout: 5s
+
+  receiver:
+    container_name: receiver
+    build:
+      context: ./receiver
+      dockerfile: Dockerfile
+    restart: always
+    depends_on:
+      - rabbitmq
+    ports:
+      - "8000:8000"
+    environment:
+      RABBITMQ_USERNAME: radmin
+      RABBITMQ_PASSWORD: radmin
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_QUEUE: test-queue
+      RABBITMQ_ROUTING_KEY: test-queue
+      RABBITMQ_EXCHANGE: test-exchange
+    networks:
+      - rabbitmq-network
+
+networks:
+  rabbitmq-network:
+    driver: bridge
